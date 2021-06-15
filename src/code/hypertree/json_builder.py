@@ -13,10 +13,36 @@ import json
 from nltk import FreqDist
 
 class JsonBuild(object):
+    papers_idx_in_raw = {}
+    raw_papers = []
+
     def __init__(self,):
 
         self.pathList=[]
         self.dataDict=None
+
+    @staticmethod
+    def load(path):
+        print('mylog: Current directory: ' + os.getcwd())
+        print('mylog: path=' + path)
+
+        # read doc->raw_doc indeces in a dictionary
+        inputDirParent_input = os.path.join(path, 'input')
+        JsonBuild.papers_idx_in_raw = {}
+        with open(os.path.join(inputDirParent_input,'papers_idx_in_raw.txt'), 'r') as fin:
+            for line in fin:
+                # print('mylog3: ' + line)
+                lineList = line.strip().split(',')
+                if (len(lineList) == 2):
+                    JsonBuild.papers_idx_in_raw.update({int(lineList[0]) : int(lineList[1])})
+
+        # read raw papers into a list
+        inputDirParent_raw = os.path.join(path, 'raw')
+        JsonBuild.raw_papers = []
+        with open(os.path.join(inputDirParent_raw,'original_papers.txt'), 'r') as fin:
+            for line in fin:
+                # print('mylog4: ' + line)
+                JsonBuild.raw_papers.append(line.strip())
         
     def createJavaScriptFile(self,path=None):
         try:
@@ -128,8 +154,7 @@ class JsonBuild(object):
             6. Add each childs return dict into a list (children list maintained in parent)
     
         '''
-    
-        
+
         if os.path.exists(os.path.join(inputDir,'hierarchy.txt')):
             children=[]
             #parent=''
@@ -180,14 +205,40 @@ class JsonBuild(object):
                         leaf_dict['center']=None
                         leaf_dict["children"]=[]
                         leaf_nodes.append(leaf_dict)
+
+                with open(os.path.join(inputDir,'doc_ids.txt'),'r') as fin:
+                    for line in fin:
+                        line = line.strip()
+                        if (len(line) == 0):
+                            continue
+                        line = int(line)
+                        if not line in JsonBuild.papers_idx_in_raw:
+                            print('[Error] extraction of the original paper failed! (path={0}, doc_idx={1})'.format(inputDir, line))
+                            continue
+                        if line >= len(JsonBuild.raw_papers):
+                            print('[Error] extraction of the original paper out of range! (path={0}, doc_idx={1})'.format(inputDir, line))
+                            continue
+                        leaf_dict={}
+                        paper = JsonBuild.raw_papers[JsonBuild.papers_idx_in_raw[line]]
+                        leaf_dict["id"]="__"+paper+"__"
+                        leaf_dict["data"]={"type":"papers","depth":level}
+                        leaf_dict["name"]=leaf_dict["id"]
+                        leaf_dict['center']=None
+                        leaf_dict["children"]=[]
+                        leaf_nodes.append(leaf_dict)
                 dataDict['children']=leaf_nodes
                 return dataDict
+
             except Exception as err:
                 print('[Error]:'+ str(err))
                 return
             
     def process(self,path,parent='*',level=1):
         try:
+            print('mylog: inside JsonBuild.process')
+            print('[Info2]: #keys in JsonBuild.papers_idx_in_raw={0}, #raw papers={1}'.format(len(JsonBuild.papers_idx_in_raw), len(JsonBuild.raw_papers)))
+            print('mylog2: -1 exists in JsonBuild.papers_idx_in_raw = {0}'.format((-1 in JsonBuild.papers_idx_in_raw)))
+
             self.dataDict=self.jsonBuilder(path,parent,level)
             self.__rootToLeafPath(self.dataDict)            
         except Exception as err:

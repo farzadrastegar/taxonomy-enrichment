@@ -39,7 +39,7 @@ def load_embedding_keywords(embedding_file):
     return keyword_set
 
 
-def trim_document_set(raw_doc_file, doc_file, keyword_file):
+def trim_document_set(raw_doc_file, doc_file, keyword_file, doc_idx_in_raw_doc_file):
     ''' A document is included only if it contains one or more keywords
 
     :param raw_doc_file:
@@ -48,12 +48,20 @@ def trim_document_set(raw_doc_file, doc_file, keyword_file):
     :return:
     '''
     keyword_set = set(load_keywords(keyword_file))
-    with open(raw_doc_file, 'r') as fin, open(doc_file, 'w') as fout:
+    with open(raw_doc_file, 'r') as fin, open(doc_file, 'w') as fout, open(doc_idx_in_raw_doc_file, 'w') as fout2:
+        raw_doc_line_number = -1
+        doc_line_number = -1
+        non_existing_raw_doc_count = 0
         for line in fin:
+            raw_doc_line_number += 1
             doc = line.strip().split()
             if check_doc_contain_keyword(doc, keyword_set):
+                doc_line_number += 1
                 fout.write(' '.join(doc) + '\n')
-
+                fout2.write(str(doc_line_number)+','+str(raw_doc_line_number)+'\n')
+            else:
+                non_existing_raw_doc_count -= 1
+                fout2.write(str(non_existing_raw_doc_count)+','+str(raw_doc_line_number)+'\n')
 
 def check_doc_contain_keyword(doc, keyword_set):
     ''' check whether a document contains one or more keywords
@@ -109,6 +117,7 @@ def main(raw_dir, input_dir, init_dir):
 
     ## Following are four output files
     doc_file = input_dir + 'papers.txt'
+    doc_idx_in_raw_doc_file = input_dir + 'papers_idx_in_raw.txt'
     keyword_file = input_dir + 'keywords.txt'
     doc_keyword_cnt_file = input_dir + 'keyword_cnt.txt'
     doc_id_file = init_dir + 'doc_ids.txt'
@@ -116,7 +125,7 @@ def main(raw_dir, input_dir, init_dir):
     trim_keywords(raw_keyword_file, keyword_file, embedding_file)
     print('Done trimming the keywords.')
 
-    trim_document_set(raw_doc_file, doc_file, keyword_file)
+    trim_document_set(raw_doc_file, doc_file, keyword_file, doc_idx_in_raw_doc_file)
     print('Done trimming the documents.')
 
     gen_doc_keyword_cnt_file(doc_file, doc_keyword_cnt_file)

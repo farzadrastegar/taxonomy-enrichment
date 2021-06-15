@@ -118,6 +118,9 @@ if [ $FIRST_RUN -eq 0 ]; then
     cp ${inputPath}/keywords.txt ${outputPath}/${corpusName}/raw/keywords.txt
     cp ${inputPath}/papers.txt ${outputPath}/${corpusName}/raw/papers.txt
 
+    # added by Farzad
+    originalCorpus=`echo ${inputPath} | sed 's/\(.*\)tmp/\1input\/corpus\/bbc_corpus.txt/'`
+    cat ${originalCorpus} | tr '\r' '\n' | sed 's/^ //g' > ${outputPath}/${corpusName}/raw/original_papers.txt
 
     if [ ! -d "${outputPath}/${corpusName}/input" ]; then
         mkdir -p ${outputPath}/${corpusName}/input

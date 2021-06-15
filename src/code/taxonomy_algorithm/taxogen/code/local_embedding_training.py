@@ -49,7 +49,7 @@ def word2vec(inputFile,outputFile,SIZE,SAMPLE,WINDOW,MIN_COUNT,ITER):
     
     
     try:
-        model = FastText(size=SIZE, window=WINDOW, min_count=MIN_COUNT,seed=0,workers=1)   # instantiate the fasttext model
+        model = FastText(size=SIZE, window=WINDOW, min_count=MIN_COUNT,seed=0,workers=1,max_n=0)   # instantiate the fasttext model (max_n added by Farzad)
         model.build_vocab(sentences=word_tokenized_corpus)                                 # build the vocabulary
         model.train(
                     sentences=word_tokenized_corpus, 
@@ -107,7 +107,7 @@ def read_files(folder, parent):
     with open(hier_file) as f:
         for line in f:
             segs = line.strip('\r\n').split(' ')
-            if segs[1] == parent:
+            if segs[1] == parent and segs[0] in embs: #fixed a bug by Farzad
                 cates[segs[0]] = set()
 
     print('[Local-embedding] Finish reading embedding, hierarchy and keywords files.')

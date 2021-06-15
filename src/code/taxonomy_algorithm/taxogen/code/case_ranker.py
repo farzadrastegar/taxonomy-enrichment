@@ -35,6 +35,9 @@ def rank_phrase(case_file):
     ph_dist_map = {}
     smoothing_factor = 0.0
     phrase_map, cell_map, cell_cnt = read_caseolap_result(case_file)
+
+    if cell_cnt == 0:
+	    print("mylog: (cell_cnt={:d}, case_file={:s}, phrase_map={:s})".format(cell_cnt, case_file, str(phrase_map)))
     unif = [1.0 / cell_cnt] * cell_cnt
     
     for ph in phrase_map:

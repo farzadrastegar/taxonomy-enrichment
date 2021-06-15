@@ -94,7 +94,7 @@ def main(param1,param2,param3):
         min_count=config[param1]['otherparam']['min_count']
         iter=config[param1]['otherparam']['iter']
         size=config[param1]['otherparam']['size']
-        data=dc.Data(param1,param3,groundTruth)
+        data=dc.Data(param1,param3)#,groundTruth)
         data.prepare()
         
     elif param1 == 'dblp':
@@ -187,6 +187,9 @@ def main(param1,param2,param3):
                              ])
             #  Tree generation (JSON) for Hypertree Visualtion
             print('[Info]: Calling json builder for generating JSON file')
+            jb.JsonBuild.load('../data/'+corpusName)
+            print('[Info]: #keys in JsonBuild.papers_idx_in_raw={0}, #raw papers={1}'.format(len(jb.JsonBuild.papers_idx_in_raw), len(jb.JsonBuild.raw_papers)))
+            print('mylog: -1 exists in JsonBuild.papers_idx_in_raw = {0}'.format((-1 in jb.JsonBuild.papers_idx_in_raw)))
             visObj=jb.JsonBuild()
             visObj.process('../data/'+corpusName+"/our-l3-0.15")
             os.chdir(dname)

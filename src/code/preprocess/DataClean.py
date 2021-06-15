@@ -78,7 +78,8 @@ class Data(object):
         self.url={
                 #'amazon_fashion':'http://deepyeti.ucsd.edu/jianmo/amazon/categoryFilesSmall/AMAZON_FASHION_5.json.gz',
                 'amazon_fashion': 'http://snap.stanford.edu/data/amazon/productGraph/categoryFiles/reviews_Clothing_Shoes_and_Jewelry.json.gz',
-                'bbc':'http://mlg.ucd.ie/files/datasets/bbc-fulltext.zip',
+                #'bbc':'http://mlg.ucd.ie/files/datasets/bbc-fulltext.zip',
+                'bbc':'https://www.dropbox.com/s/5sc45f5g3al51py/bbc-fulltext.zip',
                 'dblp':'http://dblp.org/xml/dblp.xml.gz',
                 '20newsgroup':'NA'}
         
@@ -271,7 +272,7 @@ class Data(object):
                 l_e+="\s+"+front
                 r_e+="_"+front
             cnt+=1
-        return {"left":l_e,"right":r_e}
+        return {"left":" "+l_e+" ","right":" "+r_e+" "} #fixed a bug by Farzad
     
     def lemmatize(self,w):
         w1=self.lem.lemmatize(w,pos='v')
@@ -416,7 +417,7 @@ class Data(object):
         else:
             # The keywords will be extracted and saved
             try:
-                Data.keywordExtraction(self.outputData,self.inputKeyFile,10)
+                Data.keywordExtraction(self.outputData,self.inputKeyFile,5)
                 self.processKeyWords()
             except  CustomErrorForKeyWords:
                 print('[Error]: Keywords process error')
@@ -436,7 +437,7 @@ class Data(object):
             else:
                 # Download the file and create the text file
                 self.processDownloadedCorpus(
-                            self.downloadData(self.tempPath,self.url[self.dataSetName])
+                            None #self.downloadData(self.tempPath,self.url[self.dataSetName])
                             )
                 self.processData() 
                 
@@ -462,25 +463,25 @@ class Data(object):
             
             EXTRACT_DATA_DIR=self.tempPath
             
-            with ZipFile(os.path.join(self.tempPath,downloadFile), 'r') as zipObj:
-               zipObj.extractall(EXTRACT_DATA_DIR)
-               bbcData = load_files(EXTRACT_DATA_DIR+'/bbc/', encoding="utf-8", decode_error="replace")
-               
-               with open(self.inputFile,'w',encoding='utf8') as fin:
-                   for review in bbcData['data']:
-                       tmp=''
-                       lines = review.split("\n")
-                       non_empty_lines = [line for line in lines if line.strip() != ""]
-                       for s in non_empty_lines:
-                           if s.strip('\n'):
-                               tmp=tmp+s.strip('\n')+' '
-                       fin.write(tmp)
-                       fin.write('\n')
-               
-                
-               # Keeping the target label. This is numpy array
-               with open(os.path.join(self.tempPath,'bbc_target_label.pkl'),'wb') as fout:
-                    pickle.dump(list(bbcData['target']),fout)
+            # with ZipFile(os.path.join(self.tempPath,downloadFile), 'r') as zipObj:
+                # zipObj.extractall(EXTRACT_DATA_DIR)
+            bbcData = load_files(EXTRACT_DATA_DIR+'/bbc/', encoding="utf-8", decode_error="replace")
+            
+            with open(self.inputFile,'w',encoding='utf8') as fin:
+                for review in bbcData['data']:
+                    tmp=''
+                    lines = review.split("\n")
+                    non_empty_lines = [line for line in lines if line.strip() != ""]
+                    for s in non_empty_lines:
+                        if s.strip('\n'):
+                            tmp=tmp+s.strip('\n')+' '
+                    fin.write(tmp)
+                    fin.write('\n')
+            
+            
+            # Keeping the target label. This is numpy array
+            with open(os.path.join(self.tempPath,'bbc_target_label.pkl'),'wb') as fout:
+                pickle.dump(list(bbcData['target']),fout)
                                
             return None
         

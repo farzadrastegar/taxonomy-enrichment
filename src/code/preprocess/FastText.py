@@ -52,7 +52,8 @@ class FastText(object):
                            sg=self.sg,
                            iter=self.iter,
                            seed=self.seed,
-                           workers=1
+                           workers=1,
+                           max_n=0 #added by Farzad
                            )
         
         self.model=model

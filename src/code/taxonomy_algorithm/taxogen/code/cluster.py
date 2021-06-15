@@ -108,6 +108,11 @@ def run_clustering(full_data, doc_id_file, filter_keyword_file, n_cluster, paren
                    cluster_keyword_file, hierarchy_file, doc_membership_file):
     dataset = SubDataSet(full_data, doc_id_file, filter_keyword_file)
     print('Start clustering for ', len(dataset.keywords), ' keywords under parent:', parent_description)
+   
+    #added by Farzad 
+    if len(dataset.keywords) < n_cluster:
+        n_cluster = len(dataset.keywords)
+        
     ## TODO: change later here for n_cluster selection from a range
     clus = Clusterer(dataset.embeddings, n_cluster)
     clus.fit()
